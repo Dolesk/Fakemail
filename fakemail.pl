@@ -23,7 +23,7 @@ if ($uid eq 'root') {
  system("systemctl start saslauthd.service");
  system("systemctl start sendmail.service");
  system("systemctl start sm-client.service");
- print "Initiated required services.\n";
+ print "\nInitiated required services.\n";
 
  print "\nPlease enter sender's name: ";
  $name = <STDIN>;
