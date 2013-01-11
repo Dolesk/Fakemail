@@ -2,6 +2,10 @@
 
 use Term::ANSIColor;
 use Term::ReadKey;
+use Mail::Sendmail;
+
+$correctfrom = 0;
+$correctto = 0;
 
 $uid = `whoami`;
 chop $uid;
@@ -29,26 +33,30 @@ if ($uid eq 'root') {
  print "\nPlease enter sender's name: ";
  $name = <STDIN>;
  chop $name;
- TRYFROM:
- print "Please enter sender's e-mail address: ";
- $from = <STDIN>;
- chop $from;
- if ($from =~ /^(\w|\-|\_|\.)+\@((\w|\-|\_)+\.)+[a-zA-Z]{2,}$/) {
-  print "$from is valid!\n";
- } else {
-  print "$from is invalid. Try again!\n";
-  goto TRYFROM;
+ while (!$correctfrom){
+  print "Please enter sender's e-mail address: ";
+  $from = <STDIN>;
+  chop $from;
+  if ($from =~ /^(\w|\-|\_|\.)+\@((\w|\-|\_)+\.)+[a-zA-Z]{2,}$/) {
+   print "$from is valid!\n";
+   $correctfrom = 1;
+  } else {
+   print "$from is invalid. Try again!\n";
+  }
  }
- TRYTO:
- print "Please enter receiver's e-mail address: ";
- $to = <STDIN>;
- chop $to;
- if ($to =~ /^(\w|\-|\_|\.)+\@((\w|\-|\_)+\.)+[a-zA-Z]{2,}$/) {
-  print "$to is valid!\n";
- } else {
-  print "$to is invalid. Try again!\n";
-  goto TRYTO;
+
+ while (!$correctto){
+  print "Please enter receiver's e-mail address: ";
+  $to = <STDIN>;
+  chop $to;
+  if ($to =~ /^(\w|\-|\_|\.)+\@((\w|\-|\_)+\.)+[a-zA-Z]{2,}$/) {
+   print "$to is valid!\n";
+   $correctto = 1;
+  } else {
+   print "$to is invalid. Try again!\n";
+  }
  }
+ 
  print "Select subject: ";
  $subject = <STDIN>;
  chop $subject;
@@ -64,12 +72,16 @@ if ($uid eq 'root') {
  $message = <MESSAGE>;
  close(MESSAGE) || die("Could not close file!");
 
- open(MAIL, "|/usr/sbin/sendmail -t");
- print MAIL "To: $to\n";
- print MAIL "From: $name <$from>\n";
- print MAIL "Subject: $subject\n\n";
- print MAIL "$message";
- close(MAIL);
+ %mail = ( To    	=> "$to",
+           From  	=> "$name <$from>",
+           Subject	=> "$subject",
+           Message	=> "$message"
+         );
+
+ sendmail(%mail) or die $Mail::Sendmail::error;
+
+ print "OK. Log says:\n", $Mail::Sendmail::log;
+ print "\n";
 
  system("rm message.txt");
  print "\nMessage sent to $to!\n";
