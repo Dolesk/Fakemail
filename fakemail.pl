@@ -12,7 +12,6 @@ chop $uid;
 
 if ($uid eq 'root') {
  system("clear");
- START:
 
  print color("red"), "\n   _____        __                         .__.__   ";
  print "\n _/ ____\\\____  |  | __ ____   _____ _____  |__|  |  ";
@@ -21,14 +20,10 @@ if ($uid eq 'root') {
  print "\n  |__|  (____  /__|_ \\\\___  >__|_|  (____  /__|____/";
  print "\n             \\\/     \\\/    \\\/      \\\/     \\\/    v0.2", color("reset");
 
- print "\n\nsendmail pid: ";
- $pid = system("pidof -s sendmail-mta");
- if ( $pid != 0 ) {
-  print "\n\nsendmail is not running!\n";
-  #system("service sendmail start");
-  system("systemctl start sendmail");
-  print "done!\n";
- }
+ system("systemctl start saslauthd.service");
+ system("systemctl start sendmail.service");
+ system("systemctl start sm-client.service");
+ print "Initiated required services.\n";
 
  print "\nPlease enter sender's name: ";
  $name = <STDIN>;
